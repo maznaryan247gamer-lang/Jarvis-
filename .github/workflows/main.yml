@@ -13,7 +13,9 @@ permissions:
 jobs:
   build:
     name: Build JARVIS APK
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest default :
+    working directory
+
 
     steps:
       - name: Checkout repository
