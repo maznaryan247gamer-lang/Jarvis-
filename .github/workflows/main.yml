@@ -1,4 +1,5 @@
 
+
 name: JARVIS AI - Android APK Build
 
 on:
@@ -13,9 +14,7 @@ permissions:
 jobs:
   build:
     name: Build JARVIS APK
-    runs-on: ubuntu-latest default :
-    working directory
-
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
@@ -32,19 +31,29 @@ jobs:
         with:
           gradle-version: '8.9'
 
-      - name: Check Android SDK
+      - name: Find Android project folder
+        id: project
         run: |
-          echo "ANDROID_HOME=$ANDROID_HOME"
-          test -d "$ANDROID_HOME/platforms/android-35"
+          FILE=$(find . -type f -name settings.gradle.kts \
+            -not -path '*/.gradle/*' -print -quit)
+
+          if [ -z "$FILE" ]; then
+            echo "ERROR: settings.gradle.kts not found!"
+            exit 1
+          fi
+
+          DIR=$(dirname "$FILE")
+          echo "dir=$DIR" >> "$GITHUB_OUTPUT"
+          echo "Android project found in: $DIR"
 
       - name: Build JARVIS APK
+        working-directory: ${{ steps.project.outputs.dir }}
         run: gradle assembleDebug --stacktrace
 
       - name: Upload JARVIS APK
         uses: actions/upload-artifact@v4
         with:
           name: JARVIS-AI-APK
-          path: app/build/outputs/apk/debug/app-debug.apk
+          path: '**/app/build/outputs/apk/debug/app-debug.apk'
           if-no-files-found: error
           retention-days: 7
-
